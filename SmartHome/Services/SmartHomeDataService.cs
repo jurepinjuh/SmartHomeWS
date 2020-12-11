@@ -11,11 +11,14 @@ namespace SmartHome.Services
     public class SmartHomeDataService
     {
         private readonly IMongoCollection<SmartHomeData> _data;
+        private readonly IMongoCollection<SmartHomeSettings> _settings;
         public SmartHomeDataService(ISmartHomeDatabaseSettings settings)
         {
             var client = new MongoClient(settings.ConnectionString);
             var database = client.GetDatabase(settings.DbName);
             _data = database.GetCollection<SmartHomeData>(settings.SmartHomeCollectionName);
+            _settings = database.GetCollection<SmartHomeSettings>(settings.SmartHomeSettingsCollectionName);
+
         }
 
         public List<SmartHomeData> GetAllDataForDay(DateTime date)
@@ -32,6 +35,18 @@ namespace SmartHome.Services
             return data;
 
         }
+        public async Task<SmartHomeSettings> GetSettings()
+        {
+            return await _settings.Find(s => true).Sort(new SortDefinitionBuilder<SmartHomeSettings>().Descending("$natural")).FirstOrDefaultAsync();
+        }
+        public async Task<SmartHomeSettings> Update(SmartHomeSettings settings)
+        {
+            await _settings.ReplaceOneAsync(item => item.Id == settings.Id, settings);
+            return settings;
+        }
+
+
+
         public async Task<List<SmartHomeData>> GetAllData()
         {
             return await _data.Find(s => true).ToListAsync();

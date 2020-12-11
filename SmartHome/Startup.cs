@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -11,6 +12,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SmartHome.Filters;
+using SmartHome.Hubs;
 using SmartHome.Models;
 using SmartHome.Services;
 
@@ -28,24 +31,34 @@ namespace SmartHome
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors(o => o.AddPolicy("CorsP", builder =>
+            services.AddCors(options =>
             {
-                builder.AllowAnyOrigin()
-                       .AllowAnyMethod()
-                       .AllowAnyHeader();
-            }));
+                options.AddPolicy("CorsP", builder =>
+                {
+                    builder.AllowAnyHeader().AllowAnyMethod().SetIsOriginAllowed(s=>true).AllowCredentials();
+                });
+            });
 
 
             services.Configure<SmartHomeDatabaseSettings>(
                 Configuration.GetSection(nameof(SmartHomeDatabaseSettings))
                 );
 
-            services.AddSingleton<ISmartHomeDatabaseSettings>(provider=>
+            services.AddSingleton<ISmartHomeDatabaseSettings>(provider =>
             provider.GetRequiredService<IOptions<SmartHomeDatabaseSettings>>().Value);
 
             services.AddScoped<SmartHomeDataService>();
 
+            services.AddSignalR();
             services.AddControllers();
+            services.AddMvc(options =>
+            {
+                options.Filters.Add(new RequestValidationFilter());
+               
+            }).AddFluentValidation(options =>
+            {
+                options.RegisterValidatorsFromAssemblyContaining<Startup>();
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -60,12 +73,14 @@ namespace SmartHome
 
             app.UseRouting();
             app.UseCors("CorsP");
+     
 
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<NotifyHub>("/notify");
             });
         }
     }

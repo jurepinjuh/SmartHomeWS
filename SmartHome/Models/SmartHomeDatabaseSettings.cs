@@ -10,11 +10,14 @@ namespace SmartHome.Models
         public string SmartHomeCollectionName { get; set; }
         public string ConnectionString { get; set; }
         public string DbName { get; set; }
+        public string SmartHomeSettingsCollectionName { get; set; }
     }
     public interface ISmartHomeDatabaseSettings
     {
         string SmartHomeCollectionName { get; set; }
         string ConnectionString { get; set; }
         string DbName { get; set; }
+
+        string SmartHomeSettingsCollectionName { get; set; }
     }
 }
