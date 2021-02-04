@@ -26,6 +26,7 @@ namespace SmartHome.Services
             List<SmartHomeData> data = new List<SmartHomeData>();
             foreach (var item in _data.Find(s => true).ToList())
             {
+                item.dateTime = item.dateTime.ToLocalTime();
                 if (item.dateTime.Date == date.Date)
                 {
                     data.Add(item);
@@ -52,6 +53,19 @@ namespace SmartHome.Services
             return await _data.Find(s => true).ToListAsync();
         }
 
+        public List<SmartHomeData> GetDataByPeriod(DateTime from, DateTime to)
+        {
+            List<SmartHomeData> data = new List<SmartHomeData>();
+            foreach (var item in _data.Find(s => true).ToList())
+            {
+                item.dateTime = item.dateTime.ToLocalTime();
+                if (item.dateTime < to && item.dateTime >from )
+                {
+                    data.Add(item);
+                }
+            }
+            return data;
+        }
 
         public async Task<SmartHomeData> GetCurrentData()
         {

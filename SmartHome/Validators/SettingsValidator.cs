@@ -11,6 +11,7 @@ namespace SmartHome.Validators
     {
         public SettingsValidator()
         {
+            RuleFor(s => s.Power).NotNull();
             RuleFor(s => s.Interval).NotEmpty().GreaterThan(0);
             RuleFor(s => s.WorkingFrom).NotNull().GreaterThan(-1);
             RuleFor(s => s.WorkingTo).NotNull().GreaterThan(-1);

@@ -13,6 +13,9 @@ namespace SmartHome.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
 
+        [BsonElement("power")]
+        public bool Power {get; set; }
+
         [BsonElement("interval")]
         public int Interval { get; set; }
 

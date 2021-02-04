@@ -80,7 +80,8 @@ namespace SmartHome
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<NotifyHub>("/notify");
+                endpoints.MapHub<NotifyHub>("notify");
+                endpoints.MapHub<SettingsHub>("settings");
             });
         }
     }

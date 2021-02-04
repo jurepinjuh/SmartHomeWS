@@ -17,12 +17,14 @@ namespace SmartHome.Controllers
     public class SmartHomeController : ControllerBase
     {
         private IHubContext<NotifyHub> _hub;
+        private IHubContext<SettingsHub> _settingsHub;
         private readonly SmartHomeDataService _dataService;
 
-        public SmartHomeController(SmartHomeDataService dataService,IHubContext<NotifyHub> hub)
+        public SmartHomeController(SmartHomeDataService dataService,IHubContext<NotifyHub> hub,IHubContext<SettingsHub> settingsHub)
         {
             _dataService = dataService;
             _hub = hub;
+            _settingsHub = settingsHub;
         }
 
         [HttpGet]
@@ -63,11 +65,21 @@ namespace SmartHome.Controllers
         }
 
         [HttpPut]
-        public async Task<ActionResult<SmartHomeSettings>> Update(SmartHomeSettings settings)
+        public async Task<ActionResult<SmartHomeSettings>> UpdateSettings(SmartHomeSettings settings)
         {
             var data = await _dataService.Update(settings);
+            await _settingsHub.Clients.All.SendAsync("updated", settings);
             return Ok(data);
         }
+
+        [HttpGet("{from}/{to}")]
+        public ActionResult<IEnumerable<SmartHomeData>> GetAllByPeriod(DateTime from,DateTime to)
+        {
+            var data = _dataService.GetDataByPeriod(from,to);
+            return Ok(data);
+        }
+
+
 
     }
 }
